@@ -9,21 +9,48 @@ app.use(express.json());
 
 // * Please include the private app access token in your repo BUT only an access token built in a TEST ACCOUNT. Don't do this practicum in your normal account.
 const PRIVATE_APP_ACCESS = 'pat-na1-734c46cf-85a1-45e9-8473-39c2eb3178fa';
-// const OBJECT_TYPE_ID = '2-16999360';
+const CUSTOM_OBJECTS_URL = `https://api.hubspot.com/crm/v3/schemas`;
+const OBJECTS_URL = 'https://api.hubapi.com/crm/v3/objects/contacts/';
+
+/// \brief find and return the first instance of the Pet object schema
+function findPetObject(arrayOfObjects)  {
+    let petIndex = -1;
+    for (let index = 0; index < arrayOfObjects.length; ++index) {
+        if (arrayOfObjects[index]['labels']['singular'] === "Pet") {
+            petIndex = index;
+            break;
+        }
+    }
+
+    return petIndex;
+}
 
 // TODO: ROUTE 1 - Create a new app.get route for the homepage to call your custom object data. Pass this data along to the front-end and create a new pug template in the views folder.
 
 // * Code for Route 1 goes here
 app.get('/', async (req, res) => {
-    const companies = `https://api.hubspot.com/crm/v3/schemas`;
+    const customObjects = CUSTOM_OBJECTS_URL;
     const headers = {
         Authorization: `Bearer ${PRIVATE_APP_ACCESS}`,
         'Content-Type': 'application/json'
     }
     try {
-        const response = await axios.get(companies, { headers });
-        res.json(response.data.results);
-        // console.log(response.data.results)
+        const response = await axios.get(customObjects, { headers });
+        const petIndex= findPetObject(response.data.results);
+        const petObject = response.data.results[petIndex];
+        const objectTypeId = petObject['objectTypeId'];
+        const fullyQualifiedName = petObject['fullyQualifiedName'];
+        const portalId = fullyQualifiedName;
+        const id = petObject['id'];
+
+        const petsURL = `${OBJECTS_URL}/${objectTypeId}/${id}?properties=pet_name`
+        const petResponse = await axios.get(petsURL, { headers })
+        res.json(petResponse.data)
+
+        // console.log(petObject['requiredProperties'])
+        // console.log(petObject['primaryDisplayProperty'])
+        // console.log(petObject['secondaryDisplayProperties'])
+        // console.log(petObject['objectTypeId'])
     } catch (error) {
         console.error(error);
     }
