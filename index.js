@@ -2,7 +2,7 @@ const express = require('express');
 const axios = require('axios');
 const app = express();
 
-//app.set('view engine', 'pug');
+app.set('view engine', 'pug');
 app.use(express.static(__dirname + '/public'));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
@@ -13,7 +13,7 @@ const CUSTOM_SCHEMAS_URL = `https://api.hubspot.com/crm/v3/schemas`;
 const CUSTOM_OBJECTS_URL = 'https://api.hubapi.com/crm/v3/objects';
 
 /// \brief find and return the first instance of the Pet object schema
-function findPetSchema(arrayOfObjects)  {
+function findPetSchema(arrayOfObjects) {
     let petIndex = -1;
     for (let index = 0; index < arrayOfObjects.length; ++index) {
         if (arrayOfObjects[index]['labels']['singular'] === "Pet") {
@@ -48,13 +48,16 @@ app.get('/', async (req, res) => {
         const petSchema = findPetSchema(response.data.results);
         // console.log(petSchema);
 
-        const petsURL = `${CUSTOM_OBJECTS_URL}/${petSchema.objectTypeId}`;
+        const petProperties = '&properties=pet_name&properties=pet_bio&properties=job_title'
+        const petsURL = `${CUSTOM_OBJECTS_URL}/${petSchema.objectTypeId}?${petProperties}`;
         const petsResponse = await axios.get(petsURL, { headers });
-        res.json(petSchema);
+        // res.json(petSchema);
 
-        for (let index = 0; index < petsResponse.data.results.length; ++index) {
-            console.log(petsResponse.data.results[index]);
-        }
+        const data = petsResponse.data.results;
+        res.render('pets', { title: 'Pets | HubSpot APIs', data });
+        // for (let index = 0; index < petsResponse.data.results.length; ++index) {
+        //     console.log(petsResponse.data.results[index]);
+        // }
 
     } catch (error) {
         console.error(error);
@@ -64,7 +67,7 @@ app.get('/', async (req, res) => {
 // TODO: ROUTE 2 - Create a new app.get route for the form to create or update new custom object data. Send this data along in the next route.
 
 // * Code for Route 2 goes here
-app.get('/contacts', async (req, res) => {
+app.get('/pets', async (req, res) => {
     const contacts = 'https://api.hubspot.com/crm/v3/objects/contacts';
     const headers = {
         Authorization: `Bearer ${PRIVATE_APP_ACCESS}`,
