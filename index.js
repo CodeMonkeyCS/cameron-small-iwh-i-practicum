@@ -12,6 +12,8 @@ const PRIVATE_APP_ACCESS = 'pat-na1-734c46cf-85a1-45e9-8473-39c2eb3178fa';
 const CUSTOM_SCHEMAS_URL = `https://api.hubspot.com/crm/v3/schemas`;
 const CUSTOM_OBJECTS_URL = 'https://api.hubapi.com/crm/v3/objects';
 
+let petObjects = []
+
 /// \brief find and return the first instance of the Pet object schema
 function findPetSchema(arrayOfObjects) {
     let petIndex = -1;
@@ -46,18 +48,13 @@ app.get('/', async (req, res) => {
     try {
         const response = await axios.get(customObjects, { headers });
         const petSchema = findPetSchema(response.data.results);
-        // console.log(petSchema);
 
         const petProperties = '&properties=pet_name&properties=pet_bio&properties=job_title'
         const petsURL = `${CUSTOM_OBJECTS_URL}/${petSchema.objectTypeId}?${petProperties}`;
         const petsResponse = await axios.get(petsURL, { headers });
-        // res.json(petSchema);
 
-        const data = petsResponse.data.results;
-        res.render('pets', { title: 'Pets | HubSpot APIs', data });
-        // for (let index = 0; index < petsResponse.data.results.length; ++index) {
-        //     console.log(petsResponse.data.results[index]);
-        // }
+        petObjects = petsResponse.data.results;
+        res.render('home', { title: 'Pets | HubSpot APIs', petObjects });
 
     } catch (error) {
         console.error(error);
@@ -67,16 +64,10 @@ app.get('/', async (req, res) => {
 // TODO: ROUTE 2 - Create a new app.get route for the form to create or update new custom object data. Send this data along in the next route.
 
 // * Code for Route 2 goes here
-app.get('/pets', async (req, res) => {
-    const contacts = 'https://api.hubspot.com/crm/v3/objects/contacts';
-    const headers = {
-        Authorization: `Bearer ${PRIVATE_APP_ACCESS}`,
-        'Content-Type': 'application/json'
-    }
+app.get('/update', async (req, res) => {
     try {
-        const resp = await axios.get(contacts, { headers });
-        const data = resp.data.results;
-        res.render('contacts', { title: 'Contacts | HubSpot APIs', data });
+        res.render('update', { title: 'Pets | HubSpot APIs', petObjects });
+
     } catch (error) {
         console.error(error);
     }
@@ -86,22 +77,24 @@ app.get('/pets', async (req, res) => {
 
 // * Code for Route 3 goes here
 app.post('/update', async (req, res) => {
-    const update = {
-        properties: {
-            "pets": req.body.newVal
-        }
-    }
-
-    const email = req.query.email;
-    const updateContact = `https://api.hubapi.com/crm/v3/objects/contacts/${email}?idProperty=email`;
-    const headers = {
-        Authorization: `Bearer ${PRIVATE_APP_ACCESS}`,
-        'Content-Type': 'application/json'
-    };
+    // const update = {
+    //     properties: {
+    //         "pet_name": req.body.pet_name
+    //         "pet_bio": req.body.pet_bio
+    //         "job_title": req.body.job_title
+    //     }
+    // }
+    //
+    // const email = req.query.email;
+    // const updateContact = `https://api.hubapi.com/crm/v3/objects/contacts/${email}?idProperty=email`;
+    // const headers = {
+    //     Authorization: `Bearer ${PRIVATE_APP_ACCESS}`,
+    //     'Content-Type': 'application/json'
+    // };
 
     try {
-        await axios.patch(updateContact, update, { headers } );
-        res.redirect('back');
+        // await axios.patch(updateContact, update, { headers } );
+        res.redirect('/');
     } catch(err) {
         console.error(err);
     }

@@ -1,0 +1,29 @@
+//- ** This is a sample of a pug template and how it uses the data passed to it from index.js.
+
+doctype html
+html
+    head
+        title= `${title}`
+        meta(name="viewport" content="width=device-width, initial-scale=1")
+        link(rel="stylesheet", href="/css/style.css")
+    body
+        h1 Pets
+        a(href="/") Home
+        form(method="POST")
+            .card
+                table
+                    thead
+                        tr
+                            th Name
+                            th Pet Bio
+                            th Job Title
+                    tbody
+                            each pet in petObjects
+                                tr
+                                    td
+                                        input(type="text" name="pet_name" value=pet.properties.pet_name)
+                                    td
+                                        input(type="text" name="pet_bio" value=pet.properties.pet_bio)
+                                    td
+                                        input(type="text" name="job_title" value=pet.properties.job_title)
+                input(type="submit" value="Submit")
