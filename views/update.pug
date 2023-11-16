@@ -18,12 +18,20 @@ html
                             th Pet Bio
                             th Job Title
                     tbody
-                            each pet in petObjects
-                                tr
-                                    td
-                                        input(type="text" name="pet_name" value=pet.properties.pet_name)
-                                    td
-                                        input(type="text" name="pet_bio" value=pet.properties.pet_bio)
-                                    td
-                                        input(type="text" name="job_title" value=pet.properties.job_title)
+                        each pet in petObjects
+                            tr
+                                td
+                                    input(type="text" name="pet_name" value=pet.properties.pet_name)
+                                td
+                                    input(type="text" name="pet_bio" value=pet.properties.pet_bio)
+                                td
+                                    input(type="text" name="job_title" value=pet.properties.job_title)
+                        tr
+                            td
+                                input(type="text" name="pet_name")
+                            td
+                                input(type="text" name="pet_bio")
+                            td
+                                input(type="text" name="job_title")
+
                 input(type="submit" value="Submit")
