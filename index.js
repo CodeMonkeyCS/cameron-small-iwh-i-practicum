@@ -74,29 +74,27 @@ app.get('/update', async (req, res) => {
 // * Code for Route 3 goes here
 app.post('/update', async (req, res) => {
 
+    const petProperties = 'properties=pet_name&properties=pet_bio&properties=job_title'
     const petsURL = `${CUSTOM_OBJECTS_URL}/${petObjectTypeID}`;
     const headers = {
         Authorization: `Bearer ${PRIVATE_APP_ACCESS}`,
         'Content-Type': 'application/json'
     };
 
-    // POST
-    console.log(req.body.pet_name.length);
-    if (req.body.pet_name.length > petObjects.length && req.body.pet_name[req.body.pet_name.length - 1] != '') {
+    const lastIndex = req.body.pet_name.length - 1;
+    if (req.body.pet_name.length > petObjects.length && req.body.pet_name[lastIndex] != '') {
         // POST
 
-        const create = {properties: []}
-        for (let i = 0; i < req.body.pet_name.length; i++) {
-            create.properties.push({
-                "pet_name": req.body.pet_name[i],
-                "pet_bio": req.body.pet_bio[i],
-                "job_title": req.body.job_title[i],
-            });
+        const newObject = {
+            "properties": {
+                "pet_name": req.body.pet_name[lastIndex],
+                "pet_bio": req.body.pet_bio[lastIndex],
+                "job_title": req.body.job_title[lastIndex],
+            }
         }
 
         try {
-            const petsURL = `${CUSTOM_OBJECTS_URL}/${petObjectTypeID}`;
-            await axios.post(petsURL, create, { headers });
+            await axios.post(petsURL, newObject, { headers });
         }
         catch (error) {
             console.error(error);
@@ -104,32 +102,49 @@ app.post('/update', async (req, res) => {
 
     }
     else {
-        // PATCH
-
-        const update = {properties: []}
-        for (let i = 0; i < petObjects.length; i++) {
-            update.properties.push({
-                "pet_name": req.body.pet_name[i],
-                "pet_bio": req.body.pet_bio[i],
-                "job_title": req.body.job_title[i],
-            });
-        }
-
-        console.log(update);
+        // PATCH or DELETE
 
         try {
-            await axios.patch(petsURL, update, { headers });
+            const promises = [];
+            for (let i = 0; i < petObjects.length; i++) {
+
+                // check if the pet object has changed
+                const changed = petObjects[i].properties.pet_name != req.body.pet_name[i] ||
+                                petObjects[i].properties.pet_bio != req.body.pet_bio[i] ||
+                                petObjects[i].properties.job_title != req.body.job_title[i];
+
+                // if it has changed, update the pet object
+                if (changed) {
+                    const updateURL = `${petsURL}/${petObjects[i].id}`;
+                    const update = {
+                        "properties": {
+                            "pet_name": req.body.pet_name[i],
+                            "pet_bio": req.body.pet_bio[i],
+                            "job_title": req.body.job_title[i],
+                        }
+                    };
+
+                    // if the pet name is empty, delete the pet object
+                    if (update.properties.pet_name === '') {
+                        promises.push(axios.delete(updateURL, {headers}));
+                    } else {
+                        promises.push(axios.patch(updateURL, update, {headers}));
+                    }
+                }
+            }
+
+            // wait for all the promises to resolve
+            await Promise.all(promises);
         }
         catch (error) {
             console.error(error);
         }
-
     }
 
     try {
-        // await axios.patch(updateContact, update, { headers } );
         res.redirect('/');
-    } catch(err) {
+    }
+    catch(err) {
         console.error(err);
     }
 
