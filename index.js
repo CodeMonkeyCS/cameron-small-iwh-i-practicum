@@ -50,7 +50,7 @@ app.get('/', async (req, res) => {
         const petsResponse = await axios.get(petsURL, { headers });
 
         petObjects = petsResponse.data.results;
-        res.render('home', { title: 'Pets | HubSpot APIs', petObjects });
+        res.render('homepage', { title: 'Pets | HubSpot APIs', petObjects });
 
     } catch (error) {
         console.error(error);
@@ -60,7 +60,7 @@ app.get('/', async (req, res) => {
 // TODO: ROUTE 2 - Create a new app.get route for the form to create or update new custom object data. Send this data along in the next route.
 
 // * Code for Route 2 goes here
-app.get('/update', async (req, res) => {
+app.get('/update-cobj', async (req, res) => {
     try {
         res.render('update', { title: 'Pets | HubSpot APIs', petObjects });
 
@@ -72,7 +72,7 @@ app.get('/update', async (req, res) => {
 // TODO: ROUTE 3 - Create a new app.post route for the custom objects form to create or update your custom object data. Once executed, redirect the user to the homepage.
 
 // * Code for Route 3 goes here
-app.post('/update', async (req, res) => {
+app.post('/update-cobj', async (req, res) => {
 
     const petProperties = 'properties=pet_name&properties=pet_bio&properties=job_title'
     const petsURL = `${CUSTOM_OBJECTS_URL}/${petObjectTypeID}`;
